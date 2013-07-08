@@ -2,7 +2,7 @@
 #ifndef __ODE45_H__
 #define __ODE45_H__
 
-#include <Eigen/Core>
+#include "Eigen/Core"
 
 typedef Eigen::Matrix< double, Eigen::Dynamic, 1> VectorXF;
 
