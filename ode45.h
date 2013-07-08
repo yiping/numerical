@@ -22,8 +22,19 @@ public:
 						e1, e2, e3, e4, e5, e6, e7;
 						
 	ode45(double abs_tol = 1e-6, double rel_tol=1e-6, int maxSteps = 250);
-private:
+
+	// Initialize integrator
+	void init(double t0, double tf, VectorXF & y0);
+
+	// Compute an initial step size h using y'(t)
+	void estimateInitStep();
+protected:
 	double m_abs_tol, m_rel_tol;
+	double pow;
+	double m_hmin, m_hmax;
+	double m_t;
+	VectorXF m_y;
+	int m_dim;
 	
 };
 

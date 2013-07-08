@@ -55,4 +55,27 @@ const double ode45::e5 = -17253.0/339200.0;
 const double ode45::e6 = 22.0/525.0;
 const double ode45::e7 = -1.0/40.0;
 
+ode45::ode45(double abs_tol, double rel_tol, int maxSteps): m_abs_tol(abs_tol), m_rel_tol(rel_tol), m_maxSteps(maxSteps)
+{
+
+}
+
+void ode45::init(double t0, double tf, VectorXF & y0)
+{
+	m_t = t0;
+	m_dim = y0.size();
+	m_y.resize(m_dim);
+	m_y = y0;
+	
+	m_hmin = 16*eps;
+	if (tf>t0)
+		m_hmax = 0.1*(tf - t0);
+
+}
+
+void ode45::estimateInitStep()
+{
+
+}
+
 
