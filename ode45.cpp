@@ -73,9 +73,10 @@ void ode45::init(double t0, double tf, VectorXF & y0)
 
 }
 
-void ode45::estimateInitStep()
+void ode45::estimateInitStep(ode_func f)
 {
-
+	VectorXF yprime = f(m_t, m_y);
 }
+
 
 

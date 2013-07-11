@@ -5,6 +5,7 @@
 #include "Eigen/Core"
 
 typedef Eigen::Matrix< double, Eigen::Dynamic, 1> VectorXF;
+typedef VectorXF (*ode_func)(double, VectorXF);
 
 class ode45 
 {
@@ -27,7 +28,8 @@ public:
 	void init(double t0, double tf, VectorXF & y0);
 
 	// Compute an initial step size h using y'(t)
-	void estimateInitStep();
+	template<typename T>
+	void estimateInitStep(T func);
 protected:
 	double m_abs_tol, m_rel_tol;
 	double pow;
@@ -35,7 +37,12 @@ protected:
 	double m_t;
 	VectorXF m_y;
 	int m_dim;
+
+	VectorXF (*m_odefunc)(double, VectorXF) = NULL;          
 	
 };
+
+
+
 
 #endif
