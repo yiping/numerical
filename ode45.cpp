@@ -57,7 +57,7 @@ const double ode45::e7 = -1.0/40.0;
 
 ode45::ode45(double abs_tol, double rel_tol, int maxSteps): m_abs_tol(abs_tol), m_rel_tol(rel_tol), m_maxSteps(maxSteps)
 {
-
+    cout << "ode45 (DOPRI) integrator is created" << endl;
 }
 
 void ode45::init(double t0, double tf, VectorXF & y0)
@@ -66,6 +66,9 @@ void ode45::init(double t0, double tf, VectorXF & y0)
 	m_dim = y0.size();
 	m_y.resize(m_dim);
 	m_y = y0;
+
+    m_eps = machine_eps<double, uint64_t>();
+    cout<<"machine epsilon is: "<<setprecision(18)<<m_eps<<endl;
 
 	m_hmin = 16*m_eps;
 	if (tf>t0)

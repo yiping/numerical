@@ -2,6 +2,10 @@
 #ifndef __ODE45_H__
 #define __ODE45_H__
 
+#include <iostream>
+#include <stdint.h>
+#include <iomanip>
+
 #include "Eigen/Core"
 
 typedef Eigen::Matrix< double, Eigen::Dynamic, 1> VectorXF;
@@ -9,7 +13,7 @@ typedef Eigen::Matrix< double, Eigen::Dynamic, 1> VectorXF;
 
 
 
-
+using namespace std;
 
 class ode45
 {
@@ -33,6 +37,9 @@ public:
 
 	// Compute an initial step size h using y'(t)
 
+	template<typename float_t, typename int_t>
+    float_t machine_eps();
+
 	template <typename ODEFUNC, typename USERDATA>
 	void estimateInitStep(ODEFUNC func, USERDATA params);
 protected:
@@ -43,7 +50,7 @@ protected:
 	VectorXF m_y;
 	int m_dim;
 	int m_maxSteps;
-	int m_eps; //machine epsilon
+	double m_eps; //machine epsilon
 
 
 };
@@ -52,7 +59,37 @@ template <typename ODEFUNC, typename USERDATA>
 void ode45::estimateInitStep(ODEFUNC func, USERDATA params)
 {
 	VectorXF yprime = func(m_t, m_y, params);
+	cout<<yprime<<endl;
 }
 
+template<typename float_t, typename int_t>
+float_t ode45::machine_eps()
+{
+    union
+    {
+        float_t f;
+        int_t   i;
+    } one, one_plus, little, last_little;
+
+    one.f    = 1.0;
+    little.f = 1.0;
+    last_little.f = little.f;
+
+    while(true)
+    {
+        one_plus.f = one.f;
+        one_plus.f += little.f;
+
+        if( one.i != one_plus.i )
+        {
+            last_little.f = little.f;
+            little.f /= 2.0;
+        }
+        else
+        {
+            return last_little.f;
+        }
+    }
+}
 
 #endif

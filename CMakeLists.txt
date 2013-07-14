@@ -19,8 +19,9 @@ set(EIGEN3_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/Eigen/")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 add_library( ode45 ode45.cpp)
+link_directories(${ODE_BINARY_DIR}) 
+message(STATUS "${ODE_BINARY_DIR}")
 
+add_executable(test_ode tester.cpp)
 
-
-
-#target_link_libraries () 
+target_link_libraries (test_ode ode45) 
