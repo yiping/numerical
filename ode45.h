@@ -5,12 +5,16 @@
 #include "Eigen/Core"
 
 typedef Eigen::Matrix< double, Eigen::Dynamic, 1> VectorXF;
-typedef VectorXF (*ode_func)(double, VectorXF);
 
-class ode45 
+
+
+
+
+
+class ode45
 {
 public:
-	// Dormand Prince (DOPRI) coefficents 
+	// Dormand Prince (DOPRI) coefficents
 	static const double c2, c3, c4, c5, c6, c7,
 						a21,
 						a31, a32,
@@ -21,15 +25,16 @@ public:
 						b11, b13, b14, b15, b16,
 						b21, b23, b24, b25, b26, b27,
 						e1, e2, e3, e4, e5, e6, e7;
-						
+
 	ode45(double abs_tol = 1e-6, double rel_tol=1e-6, int maxSteps = 250);
 
 	// Initialize integrator
 	void init(double t0, double tf, VectorXF & y0);
 
 	// Compute an initial step size h using y'(t)
-	template<typename T>
-	void estimateInitStep(T func);
+
+	template <typename ODEFUNC, typename USERDATA>
+	void estimateInitStep(ODEFUNC func, USERDATA params);
 protected:
 	double m_abs_tol, m_rel_tol;
 	double pow;
@@ -37,12 +42,17 @@ protected:
 	double m_t;
 	VectorXF m_y;
 	int m_dim;
+	int m_maxSteps;
+	int m_eps; //machine epsilon
 
-	VectorXF (*m_odefunc)(double, VectorXF) = NULL;          
-	
+
 };
 
-
+template <typename ODEFUNC, typename USERDATA>
+void ode45::estimateInitStep(ODEFUNC func, USERDATA params)
+{
+	VectorXF yprime = func(m_t, m_y, params);
+}
 
 
 #endif

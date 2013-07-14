@@ -66,17 +66,14 @@ void ode45::init(double t0, double tf, VectorXF & y0)
 	m_dim = y0.size();
 	m_y.resize(m_dim);
 	m_y = y0;
-	
-	m_hmin = 16*eps;
+
+	m_hmin = 16*m_eps;
 	if (tf>t0)
 		m_hmax = 0.1*(tf - t0);
 
 }
 
-void ode45::estimateInitStep(ode_func f)
-{
-	VectorXF yprime = f(m_t, m_y);
-}
+
 
 
 
