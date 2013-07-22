@@ -1,4 +1,5 @@
 #include "ode45.h"
+#include <math.h>
 
 const double ode45::c2 = 1.0/5.0;
 const double ode45::c3 = 3.0/10.0;
@@ -58,21 +59,43 @@ const double ode45::e7 = -1.0/40.0;
 ode45::ode45(double abs_tol, double rel_tol, int maxSteps): m_abs_tol(abs_tol), m_rel_tol(rel_tol), m_maxSteps(maxSteps)
 {
     cout << "ode45 (DOPRI) integrator is created" << endl;
+    m_pow = 0.2;
 }
 
-void ode45::init(double t0, double tf, VectorXF & y0)
+void ode45::init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p)
 {
 	m_t = t0;
 	m_dim = y0.size();
 	m_y.resize(m_dim);
 	m_y = y0;
 
-    m_eps = machine_eps<double, uint64_t>();
+	m_odefunc = f;
+	m_params_ptr = p;
+
+    m_eps = machine_eps<double, uint64_t>(t0);
     cout<<"machine epsilon is: "<<setprecision(18)<<m_eps<<endl;
 
 	m_hmin = 16*m_eps;
 	if (tf>t0)
 		m_hmax = 0.1*(tf - t0);
+    else
+    {
+        cerr<<"tf needs to be greater than t0. "<<endl;
+        exit(1);
+    }
+
+    m_derivative = m_odefunc(m_t, m_y, m_params_ptr);
+    cout<<"y'(0) = "<<endl;
+    cout<<setprecision(6)<<m_derivative<<endl;
+
+    // estimate an initial step
+    double threshold = m_abs_tol/m_rel_tol;
+    VectorXF threshold_vec = threshold*VectorXF::Ones(m_dim);
+    VectorXF temp = m_y.cwise().abs().max(threshold_vec);
+    double rh = m_derivative.cwise()/temp/0.8*pow(m_rel_tol, m_pow);
+
+
+
 
 }
 

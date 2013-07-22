@@ -6,14 +6,18 @@
 #include <stdint.h>
 #include <iomanip>
 
+#include "user_defs.h"
+
 #include "Eigen/Core"
+
 
 typedef Eigen::Matrix< double, Eigen::Dynamic, 1> VectorXF;
 
-
+typedef VectorXF ( * ODEFUNC)(double, VectorXF, PARAMS_PTR);
 
 
 using namespace std;
+
 
 class ode45
 {
@@ -33,21 +37,30 @@ public:
 	ode45(double abs_tol = 1e-6, double rel_tol=1e-6, int maxSteps = 250);
 
 	// Initialize integrator
-	void init(double t0, double tf, VectorXF & y0);
+	void init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p);
 
 	// Compute an initial step size h using y'(t)
 
-	template<typename float_t, typename int_t>
-    float_t machine_eps();
 
-	template <typename ODEFUNC, typename USERDATA>
-	void estimateInitStep(ODEFUNC func, USERDATA params);
+//	template <typename ODEFUNC, typename USERDATA>
+//	void estimateInitStep(ODEFUNC func, USERDATA params);
+
+
+	template<typename float_t, typename int_t>
+    float_t machine_eps(float_t x);
+
+
+
+    ODEFUNC m_odefunc;
+    PARAMS* m_params_ptr;
+
 protected:
 	double m_abs_tol, m_rel_tol;
-	double pow;
+	double m_pow;
 	double m_hmin, m_hmax;
 	double m_t;
 	VectorXF m_y;
+	VectorXF m_derivative;
 	int m_dim;
 	int m_maxSteps;
 	double m_eps; //machine epsilon
@@ -55,15 +68,17 @@ protected:
 
 };
 
-template <typename ODEFUNC, typename USERDATA>
-void ode45::estimateInitStep(ODEFUNC func, USERDATA params)
-{
-	VectorXF yprime = func(m_t, m_y, params);
-	cout<<yprime<<endl;
-}
+
+
+//template <typename ODEFUNC, typename USERDATA>
+//void ode45::estimateInitStep(ODEFUNC func, USERDATA params)
+//{
+//	VectorXF yprime = func(m_t, m_y, params);
+//	cout<<yprime<<endl;
+//}
 
 template<typename float_t, typename int_t>
-float_t ode45::machine_eps()
+float_t ode45::machine_eps(float_t x)
 {
     union
     {
@@ -71,7 +86,7 @@ float_t ode45::machine_eps()
         int_t   i;
     } one, one_plus, little, last_little;
 
-    one.f    = 1.0;
+    one.f    = x;
     little.f = 1.0;
     last_little.f = little.f;
 
