@@ -28,7 +28,7 @@ int main()
 	p->m=1.05;
 	integrator.init(0.2, 2.0, v, f1, p);
 
-
+	while(1){}
     //integrator.estimateInitStep(f1, params);
 }
 

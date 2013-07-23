@@ -1,5 +1,8 @@
 #include "ode45.h"
+#include "Eigen/Core"
 #include <math.h>
+
+using namespace Eigen;
 
 const double ode45::c2 = 1.0/5.0;
 const double ode45::c3 = 3.0/10.0;
@@ -69,6 +72,9 @@ void ode45::init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p)
 	m_y.resize(m_dim);
 	m_y = y0;
 
+
+
+
 	m_odefunc = f;
 	m_params_ptr = p;
 
@@ -77,7 +83,7 @@ void ode45::init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p)
 
 	m_hmin = 16*m_eps;
 	if (tf>t0)
-		m_hmax = 0.1*(tf - t0);
+		m_hmax = 0.1*(tf - t0); 	// by default m_hmax is 1/10 of the time interval.
     else
     {
         cerr<<"tf needs to be greater than t0. "<<endl;
@@ -91,8 +97,15 @@ void ode45::init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p)
     // estimate an initial step
     double threshold = m_abs_tol/m_rel_tol;
     VectorXF threshold_vec = threshold*VectorXF::Ones(m_dim);
-    VectorXF temp = m_y.cwise().abs().max(threshold_vec);
-    double rh = m_derivative.cwise()/temp/0.8*pow(m_rel_tol, m_pow);
+    VectorXF temp = m_y.array().abs().max(threshold_vec.array());
+	double rh =(m_derivative.array()/temp.array()).maxCoeff()/0.8*pow(m_rel_tol, m_pow);
+		
+
+	Vector3d v3(1, -2, -3);
+	Vector3d vv(-1, 4, 1);
+	cout<<v3.array().abs()<<endl<<endl;
+	cout<<v3.array().abs().max(vv.array())<<endl;
+	cout<<(v3.array()/vv.array()).maxCoeff()<<endl;
 
 
 
