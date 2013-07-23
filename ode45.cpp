@@ -68,51 +68,65 @@ ode45::ode45(double abs_tol, double rel_tol, int maxSteps): m_abs_tol(abs_tol), 
 void ode45::init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p)
 {
 	m_t = t0;
+	m_tfinal = tf;
 	m_dim = y0.size();
 	m_y.resize(m_dim);
 	m_y = y0;
 
 
-
-
 	m_odefunc = f;
 	m_params_ptr = p;
 
-    m_eps = machine_eps<double, uint64_t>(t0);
-    cout<<"machine epsilon is: "<<setprecision(18)<<m_eps<<endl;
-
-	m_hmin = 16*m_eps;
-	if (tf>t0)
-		m_hmax = 0.1*(tf - t0); 	// by default m_hmax is 1/10 of the time interval.
+    double eps = machine_eps<double, uint64_t>(m_t);
+    cout<<"machine epsilon is: "<<setprecision(18)<<eps<<endl;
+	m_hmin = 16*eps;
+	if (m_tfinal>m_t)
+		m_hmax = 0.1*(m_tfinal - m_t); 	// by default m_hmax is 1/10 of the time interval.
     else
     {
         cerr<<"tf needs to be greater than t0. "<<endl;
         exit(1);
     }
 
+
+    // Compute an initial step size h using y'(t)
     m_derivative = m_odefunc(m_t, m_y, m_params_ptr);
     cout<<"y'(0) = "<<endl;
     cout<<setprecision(6)<<m_derivative<<endl;
 
-    // estimate an initial step
+    m_h = m_hmax;
     double threshold = m_abs_tol/m_rel_tol;
     VectorXF threshold_vec = threshold*VectorXF::Ones(m_dim);
-    VectorXF temp = m_y.array().abs().max(threshold_vec.array());
-	double rh =(m_derivative.array()/temp.array()).maxCoeff()/0.8*pow(m_rel_tol, m_pow);
-		
+    VectorXF temp = m_y.array().abs().max(threshold_vec.array()); // component-wise operation
+	double rh = (m_derivative.array()/temp.array()).maxCoeff() / (0.8*pow(m_rel_tol, m_pow));
 
-	Vector3d v3(1, -2, -3);
-	Vector3d vv(-1, 4, 1);
-	cout<<v3.array().abs()<<endl<<endl;
-	cout<<v3.array().abs().max(vv.array())<<endl;
-	cout<<(v3.array()/vv.array()).maxCoeff()<<endl;
-
-
-
+    m_h = min(m_h, 1/rh);
+    m_h = max(m_h, m_hmin);
 
 }
 
 
+void ode45::simulate()
+{
+    bool done = false;
+    while(!done)
+    {
+        double eps = machine_eps<double, uint64_t>(m_t);
+        m_hmin = 16*eps;
 
+        m_h = min(m_hmax, max(m_hmin, m_h));
+
+        // Last step stretch
+        if (1.1*m_h >= abs(m_tfinal - m_t))
+        {
+            m_h = m_tfinal - m_t;
+            done = true;
+        }
+
+
+    }
+
+
+}
 
 

@@ -39,11 +39,9 @@ public:
 	// Initialize integrator
 	void init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p);
 
-	// Compute an initial step size h using y'(t)
+    // Main loop
+    void simulate();
 
-
-//	template <typename ODEFUNC, typename USERDATA>
-//	void estimateInitStep(ODEFUNC func, USERDATA params);
 
 
 	template<typename float_t, typename int_t>
@@ -57,25 +55,18 @@ public:
 protected:
 	double m_abs_tol, m_rel_tol;
 	double m_pow;
-	double m_hmin, m_hmax;
-	double m_t;
+	double m_hmin, m_hmax, m_h; // all are positive
+	double m_t, m_tfinal;
 	VectorXF m_y;
 	VectorXF m_derivative;
 	int m_dim;
 	int m_maxSteps;
-	double m_eps; //machine epsilon
+	//double m_eps; //machine epsilon
 
 
 };
 
 
-
-//template <typename ODEFUNC, typename USERDATA>
-//void ode45::estimateInitStep(ODEFUNC func, USERDATA params)
-//{
-//	VectorXF yprime = func(m_t, m_y, params);
-//	cout<<yprime<<endl;
-//}
 
 template<typename float_t, typename int_t>
 float_t ode45::machine_eps(float_t x)
