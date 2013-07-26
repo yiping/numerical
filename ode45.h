@@ -61,6 +61,7 @@ protected:
 	VectorXF m_derivative;
 	int m_dim;
 	int m_maxSteps;
+	VectorXF m_threshold_vec;
 	//double m_eps; //machine epsilon
 
 

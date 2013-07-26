@@ -96,8 +96,8 @@ void ode45::init(double t0, double tf, VectorXF & y0, ODEFUNC f, PARAMS_PTR p)
 
     m_h = m_hmax;
     double threshold = m_abs_tol/m_rel_tol;
-    VectorXF threshold_vec = threshold*VectorXF::Ones(m_dim);
-    VectorXF temp = m_y.array().abs().max(threshold_vec.array()); // component-wise operation
+    m_threshold_vec = threshold*VectorXF::Ones(m_dim);
+    VectorXF temp = m_y.array().abs().max(m_threshold_vec.array()); // component-wise operation
 	double rh = (m_derivative.array()/temp.array()).maxCoeff() / (0.8*pow(m_rel_tol, m_pow));
 
     m_h = min(m_h, 1/rh);
@@ -123,6 +123,19 @@ void ode45::simulate()
             done = true;
         }
 
+        VectorXF k1, k2, k3, k4, k5, k6, k7, err_vec;
+        double rel_err;
+
+        k1 = m_odefunc(m_t, m_y, m_params_ptr);
+        k2 = m_odefunc(m_t+c2*m_h, m_y+a21*k1, m_params_ptr);
+        k3 = m_odefunc(m_t+c3*m_h, m_y+a31*k1+a32*k2, m_params_ptr);
+        k4 = m_odefunc(m_t+c4*m_h, m_y+a41*k1+a42*k2+a43*k3, m_params_ptr);
+        k5 = m_odefunc(m_t+c5*m_h, m_y+a51*k1+a52*k2+a53*k3+a54*k4, m_params_ptr);
+        k6 = m_odefunc(m_t+c6*m_h, m_y+a61*k1+a62*k2+a63*k3+a64*k4+a65*k5, m_params_ptr);
+        k7 = m_odefunc(m_t+c7*m_h, m_y+a71*k1+a72*k2+a73*k3+a74*k4+a75*k5+a76*k6, m_params_ptr);
+
+        err_vec = e1*k1 +  e3*k3 + e4*k4 + e5*k5 + e6*k6 + e7*k7;
+        rel_err = (err_vec.array() / (m_y.array().max(m_threshold_vec.array()))).maxCoeff();
 
     }
 
